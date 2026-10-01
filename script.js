@@ -164,13 +164,13 @@
             form.reset();
           } else {
             status.classList.add('error');
-            status.textContent = 'Não foi possível enviar agora. Tente novamente ou use o e-mail contato@yatsar.com.br.';
+            status.textContent = 'Não foi possível enviar agora. Tente novamente ou use o e-mail yatsaratendimento@gmail.com.';
           }
         })
         .catch(function () {
           submitBtn.textContent = originalLabel;
           status.classList.add('error');
-          status.textContent = 'Não foi possível enviar agora. Tente novamente ou use o e-mail contato@yatsar.com.br.';
+          status.textContent = 'Não foi possível enviar agora. Tente novamente ou use o e-mail yatsaratendimento@gmail.com.';
         });
     });
   }
@@ -189,15 +189,29 @@
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (heroSymbol && hero && window.matchMedia('(min-width: 901px)').matches && !prefersReducedMotion) {
+    var ticking = false, mx = 0, my = 0;
     hero.addEventListener('mousemove', function (e) {
-      var rect = hero.getBoundingClientRect();
-      var x = (e.clientX - rect.left) / rect.width - 0.5;
-      var y = (e.clientY - rect.top) / rect.height - 0.5;
-      heroSymbol.style.transform =
-        'translateY(-50%) translate(' + (x * -14) + 'px, ' + (y * -14) + 'px)';
-    });
+      mx = e.clientX; my = e.clientY;
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        var rect = hero.getBoundingClientRect();
+        var x = (mx - rect.left) / rect.width - 0.5;
+        var y = (my - rect.top) / rect.height - 0.5;
+        heroSymbol.style.transform =
+          'translateY(-50%) translate(' + (x * -14) + 'px, ' + (y * -14) + 'px)';
+        ticking = false;
+      });
+    }, { passive: true });
     hero.addEventListener('mouseleave', function () {
       heroSymbol.style.transform = 'translateY(-50%)';
     });
+  }
+
+  /* Pause hero animations while the hero is off-screen */
+  if (hero && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      hero.classList.toggle('paused', !entries[0].isIntersecting);
+    }).observe(hero);
   }
 })();
